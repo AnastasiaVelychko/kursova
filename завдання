@@ -3,13 +3,11 @@ from tkinter import messagebox, simpledialog
 from tkinter import ttk
 import csv
 
-# Створення вікна
 My_window = tk.Tk()
 My_window.title("Телефонна книга")
 My_window.geometry("400x350")
-My_window["bg"] = "light blue"  # встановлення властивостей вікна
+My_window["bg"] = "light blue"
 
-# Функція для додавання нового контакту
 def add_contact():
     name = name_entry.get()
     address = address_entry.get()
@@ -20,19 +18,17 @@ def add_contact():
         writer = csv.writer(file)
         writer.writerow([name, address, email, mobile_phone, ])
 
-    messagebox.showinfo("Успіх", "Контакт успішно доданий")
+    messagebox.showinfo("Доданий контакт", "Контакт успішно доданий")
 
-# Функція для відображення існуючих контактів
 def view_contacts():
     with open('contacts.csv', mode='r', encoding='utf-8') as file:
         reader = csv.reader(file)
         contacts = list(reader)
-        contacts.sort(key=lambda x: x[0])  # Сортування контактів за ім'ям
+        contacts.sort(key=lambda x: x[0])
 
     messagebox.showinfo("Контакти",
                         "\n".join([", ".join(contact) for contact in contacts]))
 
-# Функція для видалення контакту
 def delete_contact():
     name_to_delete = simpledialog.askstring(
         "Видалення контакту", "Введіть ПІБ контакту, якого бажаєте видалити:")
@@ -48,9 +44,8 @@ def delete_contact():
         writer = csv.writer(file)
         writer.writerows(updated_contacts)
 
-    messagebox.showinfo("Успіх", "Контакт успішно видалений")
+    messagebox.showinfo("Видалення", "Контакт успішно видалений")
 
-# Функція для пошуку контакту
 def search_contact():
     search_param = simpledialog.askstring(
         "Пошук контакту", "Введіть ПІБ або номер телефону для пошуку:")
@@ -70,7 +65,6 @@ def search_contact():
     else:
         messagebox.showinfo("Пошук контакту", "Контакт не знайдений")
 
-# Функція для редагування контакту
 def edit_contact():
     name_to_edit = simpledialog.askstring(
         "Редагування контакту", "Введіть ПІБ контакту, якого бажаєте відредагувати:")
@@ -78,10 +72,8 @@ def edit_contact():
         reader = csv.reader(file)
         contacts = list(reader)
 
-    # Пошук контакту за ім'ям
     for contact in contacts:
         if contact[0] == name_to_edit:
-            # Відображення інформації про контакт у відповідних полях введення
             name_entry.delete(0, tk.END)
             name_entry.insert(0, contact[0])
             address_entry.delete(0, tk.END)
@@ -94,14 +86,12 @@ def edit_contact():
     else:
         messagebox.showinfo("Пошук контакту", "Контакт не знайдений")
 
-    # Функція для збереження змін у контакті
     def save_changes():
         new_name = name_entry.get()
         new_address = address_entry.get()
         new_email = email_entry.get()
         new_mobile_phone = mobile_entry.get()
 
-        # Оновлення інформації про контакт
         updated_contacts = []
         for contact in contacts:
             if contact[0] == name_to_edit:
@@ -109,22 +99,19 @@ def edit_contact():
             else:
                 updated_contacts.append(contact)
 
-        # Збереження оновленої інформації у файлі CSV
         with open('contacts.csv', mode='w', newline='', encoding='utf-8') as file:
             writer = csv.writer(file)
             writer.writerows(updated_contacts)
 
-        messagebox.showinfo("Успіх", "Інформація про контакт успішно оновлена")
+        messagebox.showinfo("Оновлення", "Інформація про контакт успішно оновлена")
 
-    # Додавання кнопки для збереження змін
     save_button = ttk.Button(My_window, text="Зберегти зміни", style="TButton", command=save_changes)
     save_button.grid(row=9, column=0, columnspan=2, padx=10, pady=5)
 
-# Інтерфейс для введення даних нового контакту
-tk.Label(My_window, text="ПІБ:", font=("Helvetica", 10, "bold"), fg="blue").grid(row=0, column=0, padx=10, pady=5)
-tk.Label(My_window, text="Адреса:", font=("Helvetica", 10, "bold"), fg="green").grid(row=1, column=0, padx=10, pady=5)
-tk.Label(My_window, text="Електронна пошта:", font=("Helvetica", 10, "bold"), fg="red").grid(row=2, column=0, padx=10, pady=5)
-tk.Label(My_window, text="Мобільний телефон:", font=("Helvetica", 10, "bold"), fg="purple").grid(row=3, column=0, padx=10, pady=5)
+tk.Label(My_window, text="ПІБ:", font=("Helvetica", 10, "bold"), fg="purple", bg="light yellow").grid(row=0, column=0, padx=10, pady=5)
+tk.Label(My_window, text="Адреса:", font=("Helvetica", 10, "bold"), fg="purple", bg="light yellow").grid(row=1, column=0, padx=10, pady=5)
+tk.Label(My_window, text="Електронна пошта:", font=("Helvetica", 10, "bold"), fg="purple", bg="light yellow").grid(row=2, column=0, padx=10, pady=5)
+tk.Label(My_window, text="Мобільний телефон:", font=("Helvetica", 10, "bold"), fg="purple", bg="light yellow").grid(row=3, column=0, padx=10, pady=5)
 
 name_entry = tk.Entry(My_window, font=("Helvetica", 10))
 name_entry.grid(row=0, column=1, padx=10, pady=5)
@@ -135,36 +122,43 @@ email_entry.grid(row=2, column=1, padx=10, pady=5)
 mobile_entry = tk.Entry(My_window, font=("Helvetica", 10))
 mobile_entry.grid(row=3, column=1, padx=10, pady=5)
 
-# Кнопка для додавання контакту
 add_button = ttk.Button(My_window, text="Додати контакт", style="TButton", command=add_contact)
 add_button.grid(row=5, column=0, columnspan=2, padx=10, pady=5)
 
-# Кнопка для перегляду контактів
 view_button = ttk.Button(My_window,
                         text="Переглянути контакти",
                         style="TButton",
                         command=view_contacts)
 view_button.grid(row=6, column=0, columnspan=2, padx=10, pady=5)
 
-# Кнопка для видалення контакту
 delete_button = ttk.Button(My_window,
                           text="Видалити контакт",
                           style="TButton",
+                           
                           command=delete_contact)
 delete_button.grid(row=7, column=0, columnspan=2, padx=10, pady=5)
 
-# Кнопка для пошуку контакту
 search_button = ttk.Button(My_window,
                           text="Пошук контакту",
                           style="TButton",
                           command=search_contact)
 search_button.grid(row=8, column=0, columnspan=2, padx=10, pady=5)
 
-# Кнопка для редагування контакту
 edit_button = ttk.Button(My_window,
                           text="Редагувати контакт",
                           style="TButton",
                           command=edit_contact)
 edit_button.grid(row=10, column=0, columnspan=2, padx=10, pady=5)
+
+# Оновлення стилів кнопок
+style = ttk.Style()
+style.configure("TButton",
+                foreground="dark blue",  # Колір тексту кнопки
+                background="light green",  # Колір фону кнопки
+                font=("Helvetica", 10, "bold"),  # Шрифт кнопки
+                width=20,  # Ширина кнопки
+                padding=5,  # Відступи кнопки
+                relief=tk.SUNKEN,  # Стиль кнопки
+                )
 
 My_window.mainloop()
