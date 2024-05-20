@@ -6,9 +6,53 @@ import csv
 # Створення головного вікна додатка
 My_window = tk.Tk()
 My_window.title("Телефонна книга")
-My_window.geometry("470x400")
+My_window.geometry("470x430")
 My_window["bg"] = "light blue"
 
+# Інструкція користувача
+instructions = """
+Інструкція до користування додатком "Телефонна книга":
+
+1. Додавання контакту:
+   - Введіть ПІБ, адресу, електронну пошту та мобільний телефон.
+   - Натисніть кнопку "Додати контакт".
+   - Після додавання з'явиться повідомлення про успіх.
+
+2. Перегляд контактів:
+   - Натисніть кнопку "Переглянути контакти".
+   - Відкриється нове вікно з інформацією про контакт.
+   - Для перегляду наступного контакту натисніть кнопку "Наступний".
+   - Для перегляду попереднього контакту натисніть кнопку "Попередній".
+
+3. Видалення контакту:
+   - Натисніть кнопку "Видалити контакт".
+   - Введіть ПІБ контакту для видалення.
+   - Якщо контакт знайдено, він буде видалений.
+
+4. Пошук контакту:
+   - Натисніть кнопку "Пошук контакту".
+   - Введіть ПІБ або номер телефону для пошуку.
+   - Якщо контакти знайдено, вони будуть відображені.
+
+5. Редагування контакту:
+   - Натисніть кнопку "Редагувати контакт".
+   - Введіть ПІБ контакту для редагування.
+   - Якщо контакт знайдено, його інформація буде заповнена.
+   - Внесіть зміни та натисніть "Зберегти зміни".
+
+Примітки:
+- Всі контакти зберігаються у файлі contacts.csv.
+- Дотримуйтесь інструкцій для коректного використання додатку.
+"""
+
+# Функція для відображення інструкції
+def show_instructions():
+    instructions_window = tk.Toplevel(My_window)
+    instructions_window.title("Інструкція")
+    instructions_window.geometry("520x610")
+    instructions_window["bg"] = "light yellow"
+    instructions_label = tk.Label(instructions_window, text=instructions, font=("Arial", 10), bg="light yellow", justify=tk.LEFT, anchor="w")
+    instructions_label.pack(padx=10, pady=10)
 
 # Функція для додавання контакту
 def add_contact():
@@ -17,6 +61,11 @@ def add_contact():
     email = email_entry.get()
     mobile_phone = mobile_entry.get()
 
+    # Перевірка наявності символу "@" в електронній пошті
+    if "@" not in email:
+        messagebox.showerror("Помилка", "Електронна пошта має містити символ '@'")
+        return
+
     # Запис нових даних у файл CSV
     with open('contacts.csv', mode='a', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
@@ -24,7 +73,6 @@ def add_contact():
 
     # Виведення повідомлення про успішне додавання контакту
     messagebox.showinfo("Доданий контакт", "Контакт успішно доданий")
-
 
 # Функція для перегляду контактів
 def view_contacts():
@@ -40,35 +88,50 @@ def view_contacts():
     else:
         messagebox.showinfo("Контакти", "Контактів не знайдено")
 
-
 # Функція для відображення діалогу з контактами
 def show_contact_dialog(contacts):
     current_contact = 0
 
+    def show_contact():
+        if 0 <= current_contact < len(contacts):
+            contact = contacts[current_contact]
+            for widget in contact_frame.winfo_children():
+                widget.destroy()
+            tk.Label(contact_frame, text=f"ПІБ: {contact[0]}", font=("Arial", 10), bg="light yellow").pack(padx=10, pady=5)
+            tk.Label(contact_frame, text=f"Адреса: {contact[1]}", font=("Arial", 10), bg="light yellow").pack(padx=10, pady=5)
+            tk.Label(contact_frame, text=f"Електронна пошта: {contact[2]}", font=("Arial", 10), bg="light yellow").pack(padx=10, pady=5)
+            tk.Label(contact_frame, text=f"Мобільний телефон: {contact[3]}", font=("Arial", 10), bg="light yellow").pack(padx=10, pady=5)
+
     def show_next_contact():
         nonlocal current_contact
-        if current_contact < len(contacts):
-            contact = contacts[current_contact]
+        if current_contact < len(contacts) - 1:
             current_contact += 1
-            contact_window = tk.Toplevel(My_window)
-            contact_window.title("Контакт")
-            contact_window.geometry("400x200")
-            contact_window["bg"] = "light blue"
-            tk.Label(contact_window, text=f"ПІБ: {contact[0]}", font=("Arial", 10), bg="light yellow").pack(padx=10,
-                                                                                                            pady=5)
-            tk.Label(contact_window, text=f"Адреса: {contact[1]}", font=("Arial", 10), bg="light yellow").pack(padx=10,
-                                                                                                               pady=5)
-            tk.Label(contact_window, text=f"Електронна пошта: {contact[2]}", font=("Arial", 10),
-                     bg="light yellow").pack(padx=10, pady=5)
-            tk.Label(contact_window, text=f"Мобільний телефон: {contact[3]}", font=("Arial", 10),
-                     bg="light yellow").pack(padx=10, pady=5)
-            next_button = ttk.Button(contact_window, text="Наступний", command=show_next_contact)
-            next_button.pack(pady=10)
-        else:
-            messagebox.showinfo("Контакти", "Це був останній контакт")
+            show_contact()
 
-    show_next_contact()
+    def show_previous_contact():
+        nonlocal current_contact
+        if current_contact > 0:
+            current_contact -= 1
+            show_contact()
 
+    contact_window = tk.Toplevel(My_window)
+    contact_window.title("Контакти")
+    contact_window.geometry("400x300")
+    contact_window["bg"] = "light blue"
+
+    contact_frame = tk.Frame(contact_window, bg="light blue")
+    contact_frame.pack(expand=True, fill=tk.BOTH)
+
+    button_frame = tk.Frame(contact_window, bg="light blue")
+    button_frame.pack()
+
+    previous_button = ttk.Button(button_frame, text="Попередній", command=show_previous_contact)
+    previous_button.grid(row=0, column=0, padx=5, pady=5)
+
+    next_button = ttk.Button(button_frame, text="Наступний", command=show_next_contact)
+    next_button.grid(row=0, column=1, padx=5, pady=5)
+
+    show_contact()
 
 # Функція для видалення контакту
 def delete_contact():
@@ -89,7 +152,6 @@ def delete_contact():
 
     messagebox.showinfo("Видалення", "Контакт успішно видалений")
 
-
 # Функція для пошуку контакту
 def search_contact():
     search_param = simpledialog.askstring("Пошук контакту", "Введіть ПІБ або номер телефону для пошуку:")
@@ -107,7 +169,6 @@ def search_contact():
         show_contact_dialog(found_contacts)
     else:
         messagebox.showinfo("Пошук контакту", "Контакт не знайдений")
-
 
 # Функція для редагування контакту
 def edit_contact():
@@ -157,29 +218,23 @@ def edit_contact():
     save_button = ttk.Button(My_window, text="Зберегти зміни", style="TButton", command=save_changes)
     save_button.grid(row=9, column=0, columnspan=2, padx=10, pady=5)
 
-
 # Створення віджетів для введення даних
-tk.Label(My_window, text="ПІБ:", font=("Arial", 10, "bold"), fg="purple", bg="light yellow").grid(row=0, column=0,
-                                                                                                  padx=10, pady=5)
-tk.Label(My_window, text="Адреса:", font=("Arial", 10, "bold"), fg="purple", bg="light yellow").grid(row=1, column=0,
-                                                                                                     padx=10, pady=5)
-tk.Label(My_window, text="Електронна пошта:", font=("Arial", 10, "bold"), fg="purple", bg="light yellow").grid(row=2,
-                                                                                                               column=0,
-                                                                                                               padx=10,
-                                                                                                               pady=5)
-tk.Label(My_window, text="Мобільний телефон:", font=("Arial", 10, "bold"), fg="purple", bg="light yellow").grid(row=3,
-                                                                                                                column=0,
-                                                                                                                padx=10,
-                                                                                                                pady=5)
+instruction_button = ttk.Button(My_window, text="!", style="TButton", command=show_instructions, width=10)
+instruction_button.grid(row=0, column=0, padx=10, pady=5, sticky="w")
+
+tk.Label(My_window, text="ПІБ:", font=("Arial", 10, "bold"), fg="purple", bg="light yellow").grid(row=1, column=0, padx=10, pady=5)
+tk.Label(My_window, text="Адреса:", font=("Arial", 10, "bold"), fg="purple", bg="light yellow").grid(row=2, column=0, padx=10, pady=5)
+tk.Label(My_window, text="Електронна пошта:", font=("Arial", 10, "bold"), fg="purple", bg="light yellow").grid(row=3, column=0, padx=10, pady=5)
+tk.Label(My_window, text="Мобільний телефон:", font=("Arial", 10, "bold"), fg="purple", bg="light yellow").grid(row=4, column=0, padx=10, pady=5)
 
 name_entry = tk.Entry(My_window, font=("Arial", 10), width=30)
-name_entry.grid(row=0, column=1, padx=10, pady=5)
+name_entry.grid(row=1, column=1, padx=10, pady=5)
 address_entry = tk.Entry(My_window, font=("Arial", 10), width=30)
-address_entry.grid(row=1, column=1, padx=10, pady=5)
+address_entry.grid(row=2, column=1, padx=10, pady=5)
 email_entry = tk.Entry(My_window, font=("Arial", 10), width=30)
-email_entry.grid(row=2, column=1, padx=10, pady=5)
+email_entry.grid(row=3, column=1, padx=10, pady=5)
 mobile_entry = tk.Entry(My_window, font=("Arial", 10), width=30)
-mobile_entry.grid(row=3, column=1, padx=10, pady=5)
+mobile_entry.grid(row=4, column=1, padx=10, pady=5)
 
 # Створення кнопок для різних дій
 add_button = ttk.Button(My_window, text="Додати контакт", style="TButton", command=add_contact)
